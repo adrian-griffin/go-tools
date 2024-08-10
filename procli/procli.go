@@ -132,6 +132,18 @@ func gitCloneDotties() error {
 	return nil
 }
 
+func gitCloneGoTools() error {
+	// Determine user and generate homedir path
+	usr, _ := user.Current()
+	homePath := usr.HomeDir
+
+	err := gitCloneRepo("https://github.com/adrian-griffin/go-tools.git", filepath.Join(homePath, "go-tools"))
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 /////
 // -- Oh My Zsh Install & Customization
 ////
@@ -208,6 +220,7 @@ func ohMyZshCustomizations() error {
 
 func main() {
 	fmt.Println(" ---------------------------------------------------- ")
+
 	// Install linux packages & tools
 	fmt.Println(" --- Installing Linux Packages & Tools")
 	if err := installLinuxTools(); err != nil {
@@ -215,25 +228,23 @@ func main() {
 		return
 	}
 	fmt.Println(" --- Completed Linux Packages & Tools Install")
-
 	fmt.Println(" ---------------------------------------------------- ")
 
+	// Set up git credential cache (takes keyboard input) for private git dotfile repository
 	fmt.Println(" --- Configuring Git Credential Cache")
 	if err := configureGitCredentialCache(); err != nil {
 		fmt.Println("Error configuring Git credential cache:", err)
 		return
 	}
 	fmt.Println(" --- Completed Git Credential Cache Configuration")
-
 	fmt.Println(" ---------------------------------------------------- ")
 
+	// Git clone remote git repo for dotfiles, stores at $HOME
 	fmt.Println(" --- Git cloning dotfile repository")
-	// Git clone dotfiles
 	if err := gitCloneDotties(); err != nil {
 		fmt.Println("Failed to git clone dotfiles:", err)
 	}
 	fmt.Println(" --- Completed dotfile repo clone")
-
 	fmt.Println(" ---------------------------------------------------- ")
 
 	// Install OMZ & Customizations
@@ -247,7 +258,14 @@ func main() {
 		return
 	}
 	fmt.Println(" --- Completed OhMyZsh & Customizations Install")
+	fmt.Println(" ---------------------------------------------------- ")
 
+	// Git clone/pull remote git repo for `adrian-griffin/go-tools`, stores at $HOME/go-tools
+	fmt.Println(" --- Git cloning go-tools repository")
+	if err := gitCloneGoTools(); err != nil {
+		fmt.Println("Failed to git clone go-tools:", err)
+	}
+	fmt.Println(" --- Completed go-tools repo clone")
 	fmt.Println(" ---------------------------------------------------- ")
 
 	fmt.Println(" -- All work is complete, please source the shell with `source ~/.zshrc`")
