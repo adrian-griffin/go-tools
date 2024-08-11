@@ -16,13 +16,14 @@ func main () {
     natIp := getPublicIP()
 
 
-    fmt.Println("--- Default route & Network Information")
-    fmt.Println("Default Gateway:", gateway)
-    fmt.Println("LAN IP:", lanIp)
-    fmt.Println("LAN Interface:", lanInt)
-    fmt.Println("DNS Servers:", dns)
-    fmt.Println("NAT/Public IP:", natIp)
-    fmt.Println("---------------------------------------")
+    fmt.Println("--- Default route & Network Information ---")
+    fmt.Println("-------------------------------------------")
+    fmt.Println("Default Gateway  :", gateway)
+    fmt.Println("LAN IP           :", lanIp)
+    fmt.Println("LAN Interface    :", lanInt)
+    fmt.Println("DNS Servers      :", dns)
+    fmt.Println("NAT/Public IP    :", natIp)
+    fmt.Println("-------------------------------------------")
 }
 
 func getDefaultGW() string {
