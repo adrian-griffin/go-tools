@@ -6,19 +6,16 @@ import (
 	"strings"
 	"flag"
 	"path/filepath"
+	"os/user"
 )
 
 func main() {
-	directory, err := os.Getwd()
-	// Error handling for dir determination
-	if err != nil {
-		// Prints error obtained upon main function failure
-		fmt.Println("Error upon home directory determination\nError:", err)
-		os.Exit(1)
-	}
+	// Determine user and generate homedir path for storing .qlips.txt
+	usr, _ := user.Current()
+	qlipsTxtDirectory := usr.HomeDir
 
 	// Qlip storage file location
-	qlipsPath := filepath.Join(directory, "qlips.txt")
+	qlipsPath := filepath.Join(qlipsTxtDirectory, ".qlips.txt")
 
 	// Available flags
 	add := flag.String("a", "", "Add new list item")
