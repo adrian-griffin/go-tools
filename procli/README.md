@@ -19,4 +19,4 @@ Extra Tools Downloaded
 
 - `/adrian-griffin/go-tools/`
 
-Procli also, by default, perfoms a `git clone` or `git pull` on a remote GitHub repository and stores the repo at `$HOME/dotties` wherein several custom dotfiles can be cloned to the machine for easy dotfile standardization. By default Procli only moves a `.zshrc` file from `$HOME/dotties` > `$HOME/.zshrc`.
+Procli also, by default, performs a `git clone` or `git pull` on a remote GitHub repository and stores the repo at `$HOME/dotties` wherein several custom dotfiles can be cloned to the machine for easy dotfile standardization. By default Procli only moves a `.zshrc` file from `$HOME/dotties` > `$HOME/.zshrc`.
