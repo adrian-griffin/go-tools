@@ -1,10 +1,8 @@
-# go-tools
+# procli
 
-A collection of Go tools that I have created for my own functionality. All can be used with, at most, a mediocre amount of Go experience and adjustment.
+Procli is a Debian/Ubuntu machine CLI provisioning tool that installs some of the most basic packages, QoL changes, and tools that I prefer to have on most of my machines. 
 
-### Procli
-
-Procli is a Debian/Ubuntu machine CLI provisioning tool that installs some of the most basic QoL changes, packages, and tools that I prefer to have on most of my machines. 
+Procli is by default configured to download the following linux packages, OhMyZsh custom plugins, and extra repositories for tools. This can be adjusted with some mediocre knowledge of Go. 
 
 Linux packages installed:
 - `Zsh`
@@ -21,4 +19,4 @@ Extra Tools Downloaded
 
 - `/adrian-griffin/go-tools/`
 
-Procli also, by default, perfoms a `git clone` or `git pull` on a remote GitHub repository and stores the repo at `$HOME/dotties` wherein several custom dotfiles can be cloned to the machine for easy dotfile standardization. By default Procli only moves a `.zshrc` file from `$HOME/dotties` > `$HOME/.zshrc`, but with some customization of the Go source, can be adjusted to clone and distribute dotfiles as needed.
+Procli also, by default, perfoms a `git clone` or `git pull` on a remote GitHub repository and stores the repo at `$HOME/dotties` wherein several custom dotfiles can be cloned to the machine for easy dotfile standardization. By default Procli only moves a `.zshrc` file from `$HOME/dotties` > `$HOME/.zshrc`.
