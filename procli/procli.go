@@ -36,7 +36,7 @@ func gitCloneRepo(repoURL, destination string) error {
 	// Check if destination directory exists
 	if _, err := os.Stat(destination); !os.IsNotExist(err) {
 		// Destination exists, perform a git pull to update the repo
-		pullCmd := exec.Command("sudo", "git", "-C", destination, "pull")
+		pullCmd := exec.Command("git", "-C", destination, "pull")
 		output, err := pullCmd.CombinedOutput()
 		if err != nil {
 			fmt.Println("Failed to pull latest changes in", destination, "Error:", err)
