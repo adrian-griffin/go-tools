@@ -26,12 +26,12 @@ func main () {
 	backupRootPath := "/opt/docker-backups/"
 
 	// Flag definitions
-	targetName := flag.String("target-name", "", "Name of target directory, not including rooth path")
+	targetName := flag.String("target", "", "Name of target directory, not including rooth path")
 	remoteSend := flag.Bool("remote-send", false, "Enable sending backup file to remote machine. Additional flags needed.")
 	remoteUser := flag.String("remote-user", "", "Remote machine username. SSH key required.")
 	remoteHost := flag.String("remote-host", "", "Remote machine IP address. SSH key required.")
 	remoteFile := flag.String("remote-file", "", "Remote filepath. Defaults to /home/$USER/$TARGETNAME.bak.tar.gz")
-	dockerBool := flag.Bool("docker", false, "Docker target? Default: false")
+	dockerBool := flag.Bool("docker", true, "Docker target? Default: true")
 
 	flag.Parse()
 
