@@ -62,6 +62,14 @@ func main () {
 	}
 
 	if *dockerBool {
+		// Get Docker image information & store it in the working dir
+		fmt.Println("-------------------------------------------------------------------------")
+		fmt.Println("Getting Docker image versions . . .")
+		err = getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
+		if err != nil {
+			log.Fatalf("Error retrieving Docker image versions: %v", err)
+		}
+
 		// Stop docker container
 		fmt.Println("-------------------------------------------------------------------------")
 		fmt.Println("Stopping Docker container . . .")
@@ -71,16 +79,6 @@ func main () {
 		if err != nil {
 			log.Fatalf("Error stopping Docker container: %v", err)
 		}
-
-		// Get Docker image information & store it in the output .tar.gz file
-		fmt.Println("-------------------------------------------------------------------------")
-		fmt.Println("Getting Docker image versions . . .")
-		err = getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
-		if err != nil {
-			log.Fatalf("Error retrieving Docker image versions: %v", err)
-		}
-		fmt.Println("Docker image information stored in docker-image-versions.txt",)
-		fmt.Println("-------------------------------------------------------------------------")
 	}
 
 	// Compress target directory
