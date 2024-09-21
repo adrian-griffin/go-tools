@@ -65,7 +65,7 @@ func main () {
 		// Get Docker image information & store it in the working dir
 		fmt.Println("-------------------------------------------------------------------------")
 		fmt.Println("Getting Docker image versions . . .")
-		err = getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
+		err := getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
 		if err != nil {
 			log.Fatalf("Error retrieving Docker image versions: %v", err)
 		}
@@ -75,7 +75,7 @@ func main () {
 		fmt.Println("Stopping Docker container . . .")
 		fmt.Println("Issuing docker compose down on ", filepath.Join(sourceDir, "docker-compose.yml"))
 		fmt.Println("-------------------------------------------------------------------------")
-		err := runCommand("docker", "compose", "-f", filepath.Join(sourceDir, "docker-compose.yml"), "down")
+		err = runCommand("docker", "compose", "-f", filepath.Join(sourceDir, "docker-compose.yml"), "down")
 		if err != nil {
 			log.Fatalf("Error stopping Docker container: %v", err)
 		}
