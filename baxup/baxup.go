@@ -46,6 +46,7 @@ func main () {
 
 	// Step 1: Stop docker container
 	fmt.Println("Stopping Docker container . . .")
+	fmt.Println("Issuing docker compose down on ", filepath.Join(sourceDir, "docker-compose.yml"))
 	err := runCommand("docker", "compose", "-f", filepath.Join(sourceDir, "docker-compose.yml", "down"))
 	if err != nil {
 		log.Fatalf("Error stopping Docker container: %v", err)
