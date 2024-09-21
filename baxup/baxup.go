@@ -73,12 +73,14 @@ func main () {
 		}
 
 		// Get Docker image information & store it in the output .tar.gz file
+		fmt.Println("-------------------------------------------------------------------------")
 		fmt.Println("Getting Docker image versions . . .")
 		err = getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
 		if err != nil {
 			log.Fatalf("Error retrieving Docker image versions: %v", err)
 		}
-
+		fmt.Println("Docker image information stored in docker-image-versions.txt",)
+		fmt.Println("-------------------------------------------------------------------------")
 	}
 
 	// Compress target directory
