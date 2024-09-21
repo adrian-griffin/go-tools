@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"os"
+	//"os"
 	"os/exec"
-	"os/user"
+	//"os/user"
 	"path/filepath"
 	"flag"
 	"log"
@@ -53,7 +53,7 @@ func main () {
 
 	// Step 2: Compress target directory
 	fmt.Println("Compressing container directory . . .")
-	err := runCommand("tar", "-cvzf", backupFile, "-C", dockerComposeRootPath, *dataDir)
+	err = runCommand("tar", "-cvzf", backupFile, "-C", dockerComposeRootPath, *targetDockerPath)
 	fmt.Println("Backup file saved at:", backupFile)
 	if err != nil {
 		log.Fatalf("Error compressing directory: %v", err)
@@ -63,7 +63,7 @@ func main () {
 	if *remoteSend {
 		fmt.Println("Copying to remote machine . . .")
 		rsyncArgs := []string{
-			"-avz", "--checksum", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, *remoteFile)
+			"-avz", "--checksum", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, *remoteFile),
 		}
 		err = runCommand("rsync",rsyncArgs...)
 		if err != nil {
