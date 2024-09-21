@@ -17,6 +17,22 @@ func runCommand(commandName string, args ...string) error {
 	return cmd.Run()
 }
 
+func getDockerImages(composeFile string, outputFile string) error {
+	cmd := exec.Command("docker", "compose", "-f", composeFile, "images")
+	output, err := cmd.Output()
+	if err != nil {
+		return fmt.Errorf("Failed to get docker images: %v", err)
+	}
+
+	err = os.WriteFile(outputFile, output, 0644)
+	if err != nil {
+		return fmt.Errorf("Failed to write docker image version info to file: %v", err)
+	}
+
+	fmt.Println("Docker image information saved to", outputFile)
+	return nil
+}
+
 func main () {
 	//// IMPORTANT: In order to change the default docker backup & docker compose container root paths, these variables much be changed manually and the script rebuilt!
 	//// Don't forget the trailing `/`
@@ -37,6 +53,7 @@ func main () {
 
 	sourceDir := filepath.Join(targetRootPath, *targetName)
 	backupFile := filepath.Join(backupRootPath, *targetName+".bak.tar.gz")
+	imageVersionFile := filepath.Join(sourceDir, "docker-image-versions.txt")
 
 	if *targetName == "" {
 		fmt.Println("Target must be specified!")
@@ -54,6 +71,14 @@ func main () {
 		if err != nil {
 			log.Fatalf("Error stopping Docker container: %v", err)
 		}
+
+		// Get Docker image information & store it in the output .tar.gz file
+		fmt.Println("Getting Docker image versions . . .")
+		err = getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
+		if err != nil {
+			log.Fatalf("Error retrieving Docker image versions: %v", err)
+		}
+
 	}
 
 	// Compress target directory
