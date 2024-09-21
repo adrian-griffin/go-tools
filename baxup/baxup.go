@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"flag"
 	"log"
+	"strings"
 )
 
 // runCommand function, requires command name (docker); accepts multiple arguments
@@ -18,18 +19,37 @@ func runCommand(commandName string, args ...string) error {
 }
 
 func getDockerImages(composeFile string, outputFile string) error {
-	cmd := exec.Command("docker", "compose", "-f", composeFile, "images")
+	cmd := exec.Command("docker", "compose", "-f", composeFile, "images", "--quiet")
 	output, err := cmd.Output()
 	if err != nil {
 		return fmt.Errorf("Failed to get docker images: %v", err)
 	}
 
-	err = os.WriteFile(outputFile, output, 0644)
+	// Loop over image IDs to gather Docker Image Digests
+	imageLines := string(output)
+	imageList := strings.Split(imageLines, "\n")
+	var imageInfo string
+
+	for _, imageID := range imageList {
+		if imageID == "" {
+			continue
+		}
+		
+		// Get image digest
+		cmdInspect := exec.Command("docker", "inspect", "--format", "{{index .RepoDigests 0}}", imageID)
+		digestOutput, err := cmdInspect.Output()
+		if err != nil {
+			return fmt.Errorf("Failed to inspect docker images: %v", err)
+		}
+		imageInfo += fmt.Sprintf("Image: %s Digest: %s\n", imageID, digestOutput)
+	}
+
+	err = os.WriteFile(outputFile, []byte(imageInfo), 0644)
 	if err != nil {
 		return fmt.Errorf("Failed to write docker image version info to file: %v", err)
 	}
 
-	fmt.Println("Docker image information saved to", outputFile)
+	fmt.Println("Docker image information and digests saved to", outputFile)
 	return nil
 }
 
