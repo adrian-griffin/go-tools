@@ -38,14 +38,6 @@ func main () {
 	sourceDir := filepath.Join(targetRootPath, *targetName)
 	backupFile := filepath.Join(backupRootPath, *targetName+".bak.tar.gz")
 
-	// If remoteFile not specified, defaults to /home/$USER/$TARGETNAME.bak.tar.gz
-	if *remoteFile == "" {
-		if *remoteUser == "" {
-			log.Fatalf("Remote user must be specified when remote file path is not provided.")
-		}
-		*remoteFile = fmt.Sprintf("/home/%s/%s.bak.tar.gz", *remoteUser, *targetName)
-	}
-
 	if *targetName == "" {
 		fmt.Println("Target must be specified!")
 		fmt.Println("Exiting..")
