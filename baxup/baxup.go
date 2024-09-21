@@ -36,7 +36,7 @@ func main () {
 
 	flag.Parse()
 	
-	sourceDir := filepath.Join(dockerComposeRootPath, *targetDockerPath)
+	sourceDir := filepath.Join(dockerComposeRootPath, *targetDockerPath, "/")
 	backupFile := filepath.Join(dockerBackupRootPath, *targetDockerPath+".bak.tar.gz")
 
 	// If remoteFile not specified, defaults to /home/$USER/$DOCKERNAME.bak.tar.gz
