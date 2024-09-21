@@ -12,7 +12,7 @@ import (
 // runCommand function, requires command name (docker); accepts multiple arguments
 func runCommand(commandName string, args ...string) error {
 	cmd := exec.Command(commandName, args...)
-	cmd.Stdout = os.Stdout
+	cmd.Stdout = nil
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
@@ -54,8 +54,10 @@ func main () {
 
 	if *dockerBool {
 		// Stop docker container
+		fmt.Println("-------------------------------------------------------------------------")
 		fmt.Println("Stopping Docker container . . .")
 		fmt.Println("Issuing docker compose down on ", filepath.Join(sourceDir, "docker-compose.yml"))
+		fmt.Println("-------------------------------------------------------------------------")
 		err := runCommand("docker", "compose", "-f", filepath.Join(sourceDir, "docker-compose.yml"), "down")
 		if err != nil {
 			log.Fatalf("Error stopping Docker container: %v", err)
@@ -63,12 +65,16 @@ func main () {
 	}
 
 	// Compress target directory
+	fmt.Println("-------------------------------------------------------------------------")
 	fmt.Println("Compressing container directory . . .")
+	fmt.Println("-------------------------------------------------------------------------")
 	err := runCommand("tar", "-cvzf", backupFile, "-C", targetRootPath, *targetName)
 	if err != nil {
 		log.Fatalf("Error compressing directory: %v", err)
 	}
+	fmt.Println("-------------------------------------------------------------------------")
 	fmt.Println("Backup file saved at:", backupFile)
+	fmt.Println("-------------------------------------------------------------------------")
 
 	// Optional: Rsync to remote destination
 	if *remoteSend {
@@ -78,7 +84,7 @@ func main () {
 		fmt.Println("Copying to remote machine . . .")
 		// Checksum forced
 		rsyncArgs := []string{
-			"-avz", "--checksum", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, *remoteFile),
+			"-avz", "--checksum", "-e", "ssh", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, *remoteFile),
 		}
 		err = runCommand("rsync", rsyncArgs...)
 		if err != nil {
@@ -88,7 +94,9 @@ func main () {
 
 	if *dockerBool {
 		// Restart docker container
+		fmt.Println("-------------------------------------------------------------------------")
 		fmt.Println("Starting Docker container . . .")
+		fmt.Println("-------------------------------------------------------------------------")
 		err = runCommand("docker", "compose", "-f", filepath.Join(sourceDir, "docker-compose.yml"), "up", "-d")
 		if err != nil {
 			log.Fatalf("Error starting Docker container: %v", err)
