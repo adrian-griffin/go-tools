@@ -28,11 +28,11 @@ func main () {
 	dockerBackupRootPath := "/opt/docker-backups/"
 
 	// Flag definitions
-	dockerContainerName := flag.String("-docker-target", "vaultwarden", "Name of docker container's directory to back up.")
-	remoteSend := flag.Bool("-remote-send", false, "Enable sending backup .tar.gz file to remote server. Additional flags needed.")
-	remoteUser := flag.String("-remote-user", "agriffin", "Remote machine username. SSH key required.")
-	remoteHost := flag.String("-remote-host", "10.115.0.1", "Remote machine IP address.  SSH key required.")
-	remoteFile := flag.String("-remote-file", "", "Remote filepath. Defaults to /home/$USER/$DOCKERNAME.bak.tar.gz")
+	dockerContainerName := flag.String("docker-target", "vaultwarden", "Name of docker container's directory to back up.")
+	remoteSend := flag.Bool("remote-send", false, "Enable sending backup .tar.gz file to remote server. Additional flags needed.")
+	remoteUser := flag.String("remote-user", "agriffin", "Remote machine username. SSH key required.")
+	remoteHost := flag.String("remote-host", "10.115.0.1", "Remote machine IP address.  SSH key required.")
+	remoteFile := flag.String("remote-file", "", "Remote filepath. Defaults to /home/$USER/$DOCKERNAME.bak.tar.gz")
 
 	flag.Parse()
 	
