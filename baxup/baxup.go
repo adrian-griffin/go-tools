@@ -28,20 +28,20 @@ func main () {
 	dockerBackupRootPath := "/opt/docker-backups/"
 
 	// Flag definitions
-	targetDockerPath := flag.String("target-path", "vaultwarden", "Name of docker container's directory to back up")
-	remoteSend := flag.Bool("remote-send", false, "Enable sending backup .tar.gz file to remote server. Additional flags needed.")
-	remoteUser := flag.String("remote-user", "agriffin", "Remote machine username. SSH key required.")
-	remoteHost := flag.String("remote-host", "10.115.0.1", "Remote machine IP address.  SSH key required.")
-	remoteFile := flag.String("remote-file", "", "Remote filepath")
+	dockerContainerName := flag.String("-docker-target", "vaultwarden", "Name of docker container's directory to back up.")
+	remoteSend := flag.Bool("-remote-send", false, "Enable sending backup .tar.gz file to remote server. Additional flags needed.")
+	remoteUser := flag.String("-remote-user", "agriffin", "Remote machine username. SSH key required.")
+	remoteHost := flag.String("-remote-host", "10.115.0.1", "Remote machine IP address.  SSH key required.")
+	remoteFile := flag.String("-remote-file", "", "Remote filepath. Defaults to /home/$USER/$DOCKERNAME.bak.tar.gz")
 
 	flag.Parse()
 	
-	sourceDir := filepath.Join(dockerComposeRootPath, *targetDockerPath, "/")
-	backupFile := filepath.Join(dockerBackupRootPath, *targetDockerPath+".bak.tar.gz")
+	sourceDir := filepath.Join(dockerComposeRootPath, *dockerContainerName, "/")
+	backupFile := filepath.Join(dockerBackupRootPath, *dockerContainerName+".bak.tar.gz")
 
 	// If remoteFile not specified, defaults to /home/$USER/$DOCKERNAME.bak.tar.gz
 	if *remoteFile == "" {
-		*remoteFile = fmt.Sprintf("/home/%s/%s.bak.tar.gz", *remoteUser, *targetDockerPath)
+		*remoteFile = fmt.Sprintf("/home/%s/%s.bak.tar.gz", *remoteUser, *dockerContainerName)
 	}
 
 	// Step 1: Stop docker container
@@ -54,7 +54,7 @@ func main () {
 
 	// Step 2: Compress target directory
 	fmt.Println("Compressing container directory . . .")
-	err = runCommand("tar", "-cvzf", backupFile, "-C", dockerComposeRootPath, *targetDockerPath)
+	err = runCommand("tar", "-cvzf", backupFile, "-C", dockerComposeRootPath, *dockerContainerName)
 	fmt.Println("Backup file saved at:", backupFile)
 	if err != nil {
 		log.Fatalf("Error compressing directory: %v", err)
@@ -63,6 +63,7 @@ func main () {
 	// Optional: Rsync to remote destination
 	if *remoteSend {
 		fmt.Println("Copying to remote machine . . .")
+		// Checksum forced
 		rsyncArgs := []string{
 			"-avz", "--checksum", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, *remoteFile),
 		}
@@ -73,14 +74,9 @@ func main () {
 	}
 
 	// Restart docker container
-	fmt.Println("Starting Docker container...")
+	fmt.Println("Starting Docker container . . .")
 	err = runCommand("docker", "compose", "-f", filepath.Join(sourceDir, "docker-compose.yml"), "up", "-d")
 	if err != nil {
 		log.Fatalf("Error starting Docker container: %v", err)
 	}
-	
-
-
-	
-
 }
