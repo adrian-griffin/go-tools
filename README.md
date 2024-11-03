@@ -13,3 +13,7 @@ A quick debian-based CLI IP & network information collection tool. It quickly co
 ### procli
 Stupid name based on Provision CLI.
 Debian-based CLI provisioning tool that auto-installs some of my most basic and needed linux packages, such as OhMyZSH, nvim, git, etc., as well as some OhMyZsh customizations/plugins. A GitLab or GitHub repository dotfile URL can be used supplied in order to sync a `~/.zshrc` file for use with OMZ. A little more rough around the edges and may need some extra elbow grease to adjust for anyone else's needs, but it can be done. 
+
+### qlip
+Named partially after the astral-human border region in the world of Berserk, qliphoth (yeah, yeah) 
+Literally a basic a** go clipboard program, but I've found some use for making it a "cli clipboard" of sorts, certainly not secure so don't throw any secrets in there, but useful for commonly copied and pasted CLI commands, for example.
