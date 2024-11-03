@@ -8,6 +8,8 @@ import (
 	"flag"
 	"log"
 	"strings"
+	//"archive/tar"
+	//"compress/gzip"
 )
 const (
 	//// IMPORTANT: In order to change the default docker backup & docker compose container root paths, these variables must be changed manually and the executable rebuilt!
@@ -125,7 +127,7 @@ func main () {
 	fmt.Println("-------------------------------------------------------------------------")
 	fmt.Println("Compressing container directory . . .")
 	fmt.Println("-------------------------------------------------------------------------")
-	err := runCommand("tar", "-cvzf", backupFile, "-C", targetRootPath, *targetName)
+	err := runCommand("tar", "-cvzf", backupFile, "-C", config.TargetRootPath, *targetName)
 	if err != nil {
 		log.Fatalf("Error compressing directory: %v", err)
 	}
@@ -138,6 +140,13 @@ func main () {
 		if *remoteUser == "" || *remoteHost == "" {
 			log.Fatalf("Remote user and host must be specified when sending to a remote machine.")
 		}
+
+		// Set default remote file path to remote user's homedir if none is specified
+		remoteFilePath := *remoteFile
+		if remoteFilePath == "" {
+			remoteFilePath = fmt.Sprintf("/home/%s/%s/.bak.tar.gz", *remoteUser, *targetName)
+		}
+
 		fmt.Println("Copying to remote machine . . .")
 		// Checksum forced
 		rsyncArgs := []string{
