@@ -9,15 +9,37 @@ import (
 	"log"
 	"strings"
 )
+const (
+	//// IMPORTANT: In order to change the default docker backup & docker compose container root paths, these variables must be changed manually and the executable rebuilt!
+	//// Don't forget the trailing `/`
 
-// runCommand function, requires command name (docker); accepts multiple arguments
+	// Defines the root directory for all docker compose container directories, as well as the directory to store compressed backups 
+	// all docker containers must be located at `/opt/docker/container1`,`/opt/docker/container2`, etc., change this root path below:
+	DefaultTargetRoot = "/opt/docker/" 
+	// Local location to store backed-up tarballs
+	DefaultBackupRoot = "/opt/docker-backups/"
+)
+// declare config struct
+type Config struct {
+	TargetRootPath  string
+	BackupRootPath  string
+	TargetName      string
+	RemoteUser      string
+	RemoteHost      string
+	RemoteSend      bool
+	DockerEnabled   bool
+}
+
+// runCommand function, requires command name (docker, tar, etc); accepts multiple arguments
 func runCommand(commandName string, args ...string) error {
 	cmd := exec.Command(commandName, args...)
-	cmd.Stdout = nil
+	
+	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	return cmd.Run()
 }
 
+// collects docker image information and digests, stores alongside `docker-compose.yml` file in newly compressed tarball
 func getDockerImages(composeFile string, outputFile string) error {
 	cmd := exec.Command("docker", "compose", "-f", composeFile, "images", "--quiet")
 	output, err := cmd.Output()
@@ -25,7 +47,7 @@ func getDockerImages(composeFile string, outputFile string) error {
 		return fmt.Errorf("Failed to get docker images: %v", err)
 	}
 
-	// Loop over image IDs to gather Docker Image Digests
+	// loop over image ids to gather docker image digests
 	imageLines := string(output)
 	imageList := strings.Split(imageLines, "\n")
 	var imageInfo string
@@ -35,7 +57,7 @@ func getDockerImages(composeFile string, outputFile string) error {
 			continue
 		}
 		
-		// Get image digest
+		// actually get image digest
 		cmdInspect := exec.Command("docker", "inspect", "--format", "{{index .RepoDigests 0}}", imageID)
 		digestOutput, err := cmdInspect.Output()
 		if err != nil {
@@ -54,12 +76,10 @@ func getDockerImages(composeFile string, outputFile string) error {
 }
 
 func main () {
-	//// IMPORTANT: In order to change the default docker backup & docker compose container root paths, these variables much be changed manually and the script rebuilt!
-	//// Don't forget the trailing `/`
-
-	// Defines the root directories for all docker compose container directories, as well as the directory to store compressed backups 
-	targetRootPath := "/opt/docker/"
-	backupRootPath := "/opt/docker-backups/"
+	config := Config{
+		TargetRootPath: DefaultTargetRoot,
+		BackupRootPath: DefaultBackupRoot,
+	}
 
 	// Flag definitions
 	targetName := flag.String("target", "", "Name of target directory, not including rooth path")
@@ -71,8 +91,8 @@ func main () {
 
 	flag.Parse()
 
-	sourceDir := filepath.Join(targetRootPath, *targetName)
-	backupFile := filepath.Join(backupRootPath, *targetName+".bak.tar.gz")
+	sourceDir := filepath.Join(config.TargetRootPath, *targetName)
+	backupFile := filepath.Join(config.BackupRootPath, *targetName+".bak.tar.gz")
 	imageVersionFile := filepath.Join(sourceDir, "docker-image-versions.txt")
 
 	if *targetName == "" {
