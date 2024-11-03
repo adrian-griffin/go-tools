@@ -2,6 +2,8 @@
 
 ✌ Some go tools ive made for my convenience with my homelab and selfhosted setups. All can be used with, at most, a mediocre amount of Go experience and a lil adjustment, feel free to copy, reuse, and redistribute in any capacity. All tools are built for debian and debian-based machines, all CLI based.
 
+Raw source, go will need to be installed on your machine to build into executables. Please visit Go's documentation for installation instructions, here: https://go.dev/doc/install
+
 ### baxup
 Performs backups on a target directory or Docker compose container. Specifically, data is tarballed and either copied to a remote machine, and stored in another directory on the local machine. Data can be reliably and securely copied to a remote machine via rsync over SSH (with data validation checksums) using the built in `remote-send` function. "Docker mode" also collects docker image digests and version information and stores this information alongside the `docker-compose.yml` file before compression at docker container termination time.
 
@@ -21,3 +23,36 @@ Debian-based CLI provisioning tool that auto-installs some of my most basic and 
 Named partially after the astral-human border region in the world of Berserk, qliphoth (yeah, yeah) 
 
 Literally a basic a** go clipboard program, but I've found some use for making it a "cli clipboard" of sorts, certainly not secure so don't throw any secrets in there, but useful for commonly copied and pasted CLI commands, for example.
+
+
+---
+
+### Set up and use one of these scripts
+
+Git clone (https) and cd into designated tool dir
+```shell
+·> git clone https://github.com/adrian-griffin/go-tools.git && cd go-tools/ipx
+```
+
+Go build into executable
+```shell
+·> go build ipx
+```
+
+Run tool
+```shell
+·> ipx
+--- Default route & Network Information ---
+-------------------------------------------
+Default Gateway  : 10.115.128.1
+LAN IP           : 10.115.128.88
+LAN Interface    : eth2
+DNS Servers      : 10.115.128.8
+NAT/Public IP    : <ip>
+-------------------------------------------
+```
+
+Optionally, set rcfile alias to allow calling the command remotely from anywhere on the machine
+```shell
+alias ipx="$HOME/go-tools/ipx/ipx"
+```
