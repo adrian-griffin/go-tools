@@ -77,14 +77,28 @@ func getDockerImages(composeFile string, outputFile string) error {
 	return nil
 }
 
+func checkDockerRunState(composeFile string) (bool, error) {
+	cmd := exec.Command("docker", "compose", "-f", composeFile, "ps", "--services", "--filter","--status=running")
+	output, err := cmd.Output()
+	if err != nil {
+		return false, fmt.Errorf("Failed to check Docker container status: %v", err)
+	}
+	runningServices := strings.TripSpace(string(output))
+	if runningServices == "" {
+		return false, nil
+	}
+	return true, nil
+}
+
 func main () {
+	// Defines config values
 	config := Config{
 		TargetRootPath: DefaultTargetRoot,
 		BackupRootPath: DefaultBackupRoot,
 	}
 
 	// Flag definitions
-	targetName := flag.String("target", "", "Name of target directory, not including rooth path")
+	targetName := flag.String("target", "", "Name of target directory, not including root path")
 	remoteSend := flag.Bool("remote-send", false, "Enable sending backup file to remote machine. Additional flags needed.")
 	remoteUser := flag.String("remote-user", "", "Remote machine username. SSH key required.")
 	remoteHost := flag.String("remote-host", "", "Remote machine IP address. SSH key required.")
@@ -104,6 +118,21 @@ func main () {
 	}
 
 	if *dockerBool {
+		composeFilePath := filepath.Join(sourceDir, "docker-compose.yml")
+
+		// Check that docker-compose.yml file exists
+		if _, err := os.Stat(composeFilePath); os.IsNotExist(err) {
+			log.Fatalf("docker-compose.yml not found at %s", composeFilePath)
+		}
+		// Ensure Docker container is running
+		running, err := checkDockerRunState(composeFilePath)
+		if err != nil {
+			log.Fatalf("Error checking Docker container status: %v", err)
+		}
+		if !running {
+			log.Fatalf("FATAL ERROR: Docker container is not running or not locateable, exiting!")
+		}
+
 		// Get Docker image information & store it in the working dir
 		fmt.Println("-------------------------------------------------------------------------")
 		fmt.Println("Getting Docker image versions . . .")
@@ -144,13 +173,13 @@ func main () {
 		// Set default remote file path to remote user's homedir if none is specified
 		remoteFilePath := *remoteFile
 		if remoteFilePath == "" {
-			remoteFilePath = fmt.Sprintf("/home/%s/%s/.bak.tar.gz", *remoteUser, *targetName)
+			remoteFilePath = fmt.Sprintf("/home/%s/%s.bak.tar.gz", *remoteUser, *targetName)
 		}
 
 		fmt.Println("Copying to remote machine . . .")
 		// Checksum forced
 		rsyncArgs := []string{
-			"-avz", "--checksum", "-e", "ssh", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, *remoteFile),
+			"-avz", "--checksum", "-e", "ssh", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, *remoteFilePath),
 		}
 		err = runCommand("rsync", rsyncArgs...)
 		if err != nil {
