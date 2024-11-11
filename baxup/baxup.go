@@ -1,6 +1,6 @@
 package main
 
-// Baxup v0.85.4
+// Baxup v0.86.0
 
 import (
     "flag"
@@ -34,6 +34,8 @@ type Config struct {
     RemoteHost     string
     RemoteSend     bool
     DockerEnabled  bool
+
+    SkipLocal      bool
 }
 
 // runCommand function, requires command name (docker, tar, etc); accepts multiple arguments
@@ -111,18 +113,43 @@ func main() {
     remoteHost := flag.String("remote-host", "", "Remote machine IP address. SSH key required.")
     remoteFile := flag.String("remote-file", "", "Remote filepath. Defaults to /home/$USER/$TARGETNAME.bak.tar.gz")
     dockerBool := flag.Bool("docker", true, "Docker target? Default: true")
+    skipLocal  := flag.Bool("skip-local",false, "Skip local backups, only send to remote target (Still requires -remote-send)")
+
+    // New flags for custom paths
+    customSrcRoot := flag.String("src-root", "", "Custom source root path (overrides default set in Config)")
+    customDstRoot := flag.String("dst-root", "", "Custom destination root path (overrides default set in Config)")
 
     flag.Parse()
 
-    sourceDir := filepath.Join(config.TargetRootPath, *targetName)
-    backupFile := filepath.Join(config.BackupRootPath, *targetName+".bak.tar.gz")
-    imageVersionFile := filepath.Join(sourceDir, "docker-image-versions.txt")
+    // Apply override paths if provided
+
+    if *customSrcRoot != "" {
+        config.TargetRootPath = *customSrcRoot
+    }
+
+    if *customDstRoot != "" {
+        config.BackupRootPath = *customDstRoot
+    }
+
+    // Flag validations
 
     if *targetName == "" {
         fmt.Println("Target must be specified!")
         fmt.Println("Exiting..")
         os.Exit(1)
     }
+
+    if *skipLocal && !*remoteSend {
+        fmt.Println("Error: -skip-local requires -remote-send to be set")
+        fmt.Println("Exiting ...")
+        os.Exit(1)
+    }
+
+    sourceDir := filepath.Join(config.TargetRootPath, *targetName)
+    backupFile := filepath.Join(config.BackupRootPath, *targetName+".bak.tar.gz")
+    imageVersionFile := filepath.Join(sourceDir, "docker-image-versions.txt")
+
+    // Handle docker operations
 
     if *dockerBool {
         composeFilePath := filepath.Join(sourceDir, "docker-compose.yml")
@@ -143,7 +170,7 @@ func main() {
         // Get Docker image information & store it in the working dir
         fmt.Println("-------------------------------------------------------------------------")
         fmt.Println("Getting Docker image versions . . .")
-        err = getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
+        err = getDockerImages(composeFilePath, imageVersionFile)
         if err != nil {
             log.Fatalf("Error retrieving Docker image versions: %v", err)
         }
@@ -151,27 +178,35 @@ func main() {
         // Stop docker container
         fmt.Println("-------------------------------------------------------------------------")
         fmt.Println("Stopping Docker container . . .")
-        fmt.Println("Issuing docker compose down on ", filepath.Join(sourceDir, "docker-compose.yml"))
+        fmt.Println("Issuing docker compose down on ", composeFilePath)
         fmt.Println("-------------------------------------------------------------------------")
-        err = runCommand("docker", "compose", "-f", filepath.Join(sourceDir, "docker-compose.yml"), "down")
+        err = runCommand("docker", "compose", "-f", composeFilePath, "down")
         if err != nil {
             log.Fatalf("Error stopping Docker container: %v", err)
         }
+    }
+
+    // Create temp backup file if skipping local backup
+    tempBackupFile := backupFile
+    if *skipLocal {
+        tempBackupFile = filepath.Join(os.tempDir(), *targetName+".bak.tar.gz")
     }
 
     // Compress target directory
     fmt.Println("-------------------------------------------------------------------------")
     fmt.Println("Compressing container directory . . .")
     fmt.Println("-------------------------------------------------------------------------")
-    err = runCommand("tar", "-cvzf", backupFile, "-C", config.TargetRootPath, *targetName)
+    err = runCommand("tar", "-cvzf", tempBackupFile, "-C", config.TargetRootPath, *targetName)
     if err != nil {
         log.Fatalf("Error compressing directory: %v", err)
     }
-    fmt.Println("-------------------------------------------------------------------------")
-    fmt.Println("Backup file saved at:", backupFile)
-    fmt.Println("-------------------------------------------------------------------------")
 
-    // Optional: Rsync to remote destination
+    if !*skipLocal {
+        fmt.Println("-------------------------------------------------------------------------")
+        fmt.Println("Backupfile saved at:", backupFile)
+    }
+
+    // Handle remote rsync transfer
     if *remoteSend {
         if *remoteUser == "" || *remoteHost == "" {
             log.Fatalf("Remote user and host must be specified when sending to a remote machine.")
@@ -186,7 +221,7 @@ func main() {
         fmt.Println("Copying to remote machine . . .")
         // Checksum forced
         rsyncArgs := []string{
-            "-avz", "--checksum", "-e", "ssh", backupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, remoteFilePath),
+            "-avz", "--checksum", "-e", "ssh", tempBackupFile, fmt.Sprintf("%s@%s:%s", *remoteUser, *remoteHost, remoteFilePath),
         }
         err = runCommand("rsync", rsyncArgs...)
         if err != nil {
@@ -194,8 +229,16 @@ func main() {
         }
     }
 
+    // Clean up temp files if used
+    if *skipLocal && tempBackupFile != backupFile {
+        err = os.Remove(tempBackupFile)
+        if err != nil {
+            log.Printf("Warning: Failed to remove temporary backup file %s: %v", tempBackupFile, err)
+        }
+    }
+
+    // Restart docker container
     if *dockerBool {
-        // Restart docker container
         fmt.Println("-------------------------------------------------------------------------")
         fmt.Println("Starting Docker container . . .")
         fmt.Println("-------------------------------------------------------------------------")

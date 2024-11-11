@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [v0.86.0] - 2024-11-10
+
+- Added option to forego local backups
+- Added support for custom backup and target directories
+
 ## [v0.85.4] - 2024-11-10
 - Compilation errors
 
