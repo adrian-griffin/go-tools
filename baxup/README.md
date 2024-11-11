@@ -11,31 +11,50 @@ The newly compressed file, including the aforementioned image digests, can optio
 ### Example use-cases
 
 Compress a copy of a target directories data, storing it in the defined backup directory
-```
+```shell
 ## Compresses /$ROOTPATH/$TARGETNAME/ to defined backup directory
-./baxup -target=foo
+·> ./baxup -target=foo
 ```
 
 Stop target docker container, perform a backup of its current image digests and stored data, and restart it
-```
+```shell
 ## Stops $TARGETNAME docker container, collects image digests, compresses data to store in backup dir, and restarts container in background
-./baxup -target=foobar -docker
+·> ./baxup -target=foobar -docker
 ```
 
 Backup docker container, storing copy of the backup and img digests both Locally and on a Remote backup server
 Note that in order for Baxup to be used with Crontabs, an SSH key must be utilized! Otherwise, remote password can be passed at runtime.
-```
+```shell
 ## Backs up docker container's data and copies it to remote machine
-./baxup -target-name=foobar -docker -remote-send=true -remote-user=admin -remote-host=192.168.0.1
+·> ./baxup \
+  -target=foobar \
+  -docker \
+  -remote-send=true \
+  -remote-user=admin \
+  -remote-host=192.168.0.1  
+```
+
+Perform compression & secure transfer for regular (non Docker), specific target directory, sending to specified remote path on remote machine. Skips storage of directory backup on local machine.
+```shell
+### Skip local backup, and compress & copy non-docker directory to remote destination path
+·> sudo ./baxup 
+-target=foo \ 
+-skip-local \ 
+-docker=false \
+-remote-send \ 
+-remote-host 192.168.0.1 \
+-src-root=/etc/foo \ 
+-remote-file=/path/to/dst/foo.bak.tar.gz \ 
+-remote-user=agriffin 
+
 ```
 
 ### Crontab usecase
 Again, please note that crontab backups will require SSH keys between the local and target/remote machine (unless you wanna be around to enter the remote password at runtime in the middle of the night lol)
 These work great for nightly docker backups and copy critical docker container data to a remote machine for easy restoration in the event of an emergency, even being self contained enough to be rebuilt on the remote machine in the event the local one no longer exists.
-```
-> crontab -e
-
-. . . 
+```shell
+·> crontab -e
+# . . . 
 # m h  dom mon dow   command
 
 ## Perform local backup on docker container every night at 1:00

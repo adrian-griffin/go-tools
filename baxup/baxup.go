@@ -1,6 +1,6 @@
 package main
 
-// Baxup v0.86.2
+// Baxup v0.86.3
 
 import (
     "flag"
@@ -108,9 +108,9 @@ func main() {
 
     // Flag definitions
     targetName := flag.String("target", "", "Name of target directory, not including root path")
-    remoteSend := flag.Bool("remote-send", false, "Enable sending backup file to remote machine. Additional flags needed.")
-    remoteUser := flag.String("remote-user", "", "Remote machine username. SSH key required.")
-    remoteHost := flag.String("remote-host", "", "Remote machine IP address. SSH key required.")
+    remoteSend := flag.Bool("remote-send", false, "Enable sending backup file to remote machine. Additional flags needed!")
+    remoteUser := flag.String("remote-user", "", "Remote machine username")
+    remoteHost := flag.String("remote-host", "", "Remote machine IP address")
     remoteFile := flag.String("remote-file", "", "Remote filepath. Defaults to /home/$USER/$TARGETNAME.bak.tar.gz")
     dockerBool := flag.Bool("docker", true, "Docker target? Default: true")
     skipLocal  := flag.Bool("skip-local",false, "Skip local backups, only send to remote target (Still requires -remote-send)")
