@@ -1,5 +1,7 @@
 package main
 
+// Baxup v0.85.2
+
 import (
 	"fmt"
 	"os"
@@ -83,7 +85,7 @@ func checkDockerRunState(composeFile string) (bool, error) {
 	if err != nil {
 		return false, fmt.Errorf("Failed to check Docker container status: %v", err)
 	}
-	runningServices := strings.TripSpace(string(output))
+	runningServices := strings.TrimSpace(string(output))
 	if runningServices == "" {
 		return false, nil
 	}
@@ -91,6 +93,9 @@ func checkDockerRunState(composeFile string) (bool, error) {
 }
 
 func main () {
+
+	var err error
+
 	// Defines config values
 	config := Config{
 		TargetRootPath: DefaultTargetRoot,
@@ -136,7 +141,7 @@ func main () {
 		// Get Docker image information & store it in the working dir
 		fmt.Println("-------------------------------------------------------------------------")
 		fmt.Println("Getting Docker image versions . . .")
-		err := getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
+		err = getDockerImages(filepath.Join(sourceDir, "docker-compose.yml"), imageVersionFile)
 		if err != nil {
 			log.Fatalf("Error retrieving Docker image versions: %v", err)
 		}
