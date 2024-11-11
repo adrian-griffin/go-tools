@@ -23,6 +23,7 @@ Stop target docker container, perform a backup of its current image digests and 
 ```
 
 Backup docker container, storing copy of the backup and img digests both Locally and on a Remote backup server
+
 Note that in order for Baxup to be used with Crontabs, an SSH key must be utilized! Otherwise, remote password can be passed at runtime.
 ```shell
 ## Backs up docker container's data and copies it to remote machine
@@ -51,6 +52,7 @@ Perform compression & secure transfer for regular (non Docker), specific target 
 
 ### Crontab usecase
 Again, please note that crontab backups will require SSH keys between the local and target/remote machine (unless you wanna be around to enter the remote password at runtime in the middle of the night lol)
+
 These work great for nightly docker backups and copy critical docker container data to a remote machine for easy restoration in the event of an emergency, even being self contained enough to be rebuilt on the remote machine in the event the local one no longer exists.
 ```shell
 ·> crontab -e

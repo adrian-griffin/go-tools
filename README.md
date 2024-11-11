@@ -37,9 +37,9 @@ alias ipx="$HOME/go-tools/ipx/ipx"
 ```
 
 ### baxup
-Performs backups on a target directory or Docker compose container. Specifically, data is tarballed and either copied to a remote machine, and stored in another directory on the local machine. Data can be reliably and securely copied to a remote machine via rsync over SSH (with data validation checksums) using the built in `remote-send` function. "Docker mode" also collects docker image digests and version information and stores this information alongside the `docker-compose.yml` file before compression at docker container termination time.
+Performs reliable backups on a target directory or Docker compose container. Specifically, data is compressed and copied to a remote machine and/or stored in another directory on the local machine. Reliability in data consistency and security while in transport via rsync over SSH (with data validation checksums) using the built in `remote-send` function. Optionally, with "Docker mode" also collects docker image digests and version information and stores this information alongside the `docker-compose.yml` file before compression. This allows better recovery reliability as specific docker sha256 digest hashes can be used to ensure recovery efforts of data are spun up with the exact docker image as stored with the previous backup.
 
-Better yet, so long as SSH keys are set up between the local and remote machine, `baxup` can be used in conjunction with cronjobs to allow periodic, scheduled backups of directories or docker containers that ensures data consistency with docker services, and secure and reliable remote transfer of compressed backup data with checksum validation and SSH encryptions enforced. 
+Better yet, so long as SSH keys are set up between the local and remote machine(s), `baxup` can be used in conjunction with cronjobs to allow periodic, scheduled backups of directories or docker containers that ensures data consistency with docker services, and secure and reliable remote transfer of compressed backup data with checksum validation and SSH encryptions enforced. 
 
 ### ipx 
 Like `ip a` but better (?)
