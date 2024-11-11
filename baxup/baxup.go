@@ -1,6 +1,6 @@
 package main
 
-// Baxup v0.86.1
+// Baxup v0.86.2
 
 import (
     "flag"
@@ -84,7 +84,7 @@ func getDockerImages(composeFile string, outputFile string) error {
 }
 
 func checkDockerRunState(composeFile string) (bool, error) {
-    cmd := exec.Command("docker", "compose", "-f", composeFile, "ps", "--services", "--filter", "--status=running")
+    cmd := exec.Command("docker", "compose", "-f", composeFile, "ps", "--services", "--filter", "status=running")
     output, err := cmd.Output()
     if err != nil {
         return false, fmt.Errorf("Failed to check Docker container status: %v", err)
