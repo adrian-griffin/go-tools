@@ -6,6 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [v0.86.1] - 2024-11-10
+- Fixed syntax compilation errors
+
 ## [v0.86.0] - 2024-11-10
 
 - Added option to forego local backups

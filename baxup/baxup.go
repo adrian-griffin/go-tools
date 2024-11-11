@@ -1,6 +1,6 @@
 package main
 
-// Baxup v0.86.0
+// Baxup v0.86.1
 
 import (
     "flag"
@@ -189,7 +189,7 @@ func main() {
     // Create temp backup file if skipping local backup
     tempBackupFile := backupFile
     if *skipLocal {
-        tempBackupFile = filepath.Join(os.tempDir(), *targetName+".bak.tar.gz")
+        tempBackupFile = filepath.Join(os.TempDir(), *targetName+".bak.tar.gz")
     }
 
     // Compress target directory
