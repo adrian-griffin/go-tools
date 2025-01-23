@@ -32,6 +32,7 @@ type Config struct {
 	TargetName     string
 	RemoteUser     string
 	RemoteHost     string
+	Version        string
 	RemoteSend     bool
 	DockerEnabled  bool
 	SkipLocal      bool
@@ -72,6 +73,7 @@ func getDockerImages(composeFile string, outputFile string) error {
 	cmd := exec.Command("docker", "compose", "-f", composeFile, "images", "--quiet")
 	output, err := cmd.Output()
 	if err != nil {
+
 		return fmt.Errorf("Failed to get docker images: %v", err)
 	}
 
@@ -130,6 +132,7 @@ func main() {
 	config := Config{
 		TargetRootPath: DefaultTargetRoot,
 		BackupRootPath: DefaultBackupRoot,
+		Version:        Version,
 	}
 
 	// Flag definitions
@@ -140,12 +143,19 @@ func main() {
 	remoteFile := flag.String("remote-file", "", "Remote filepath. Defaults to /home/$USER/$TARGETNAME.bak.tar.gz")
 	dockerBool := flag.Bool("docker", true, "Docker target? Default: true")
 	skipLocal := flag.Bool("skip-local", false, "Skip local backups, only send to remote target (Still requires -remote-send)")
+	appVersion := flag.Bool("version", false, "Display app version information")
 
 	// New flags for custom paths
 	customSrcRoot := flag.String("src-root", "", "Custom source root path (overrides default set in Config)")
 	customDstRoot := flag.String("dst-root", "", "Custom destination root path (overrides default set in Config)")
 
 	flag.Parse()
+
+	// Informational flags processed first
+	if *appVersion {
+		fmt.Printf("Baxup %s", Version)
+		os.Exit(0)
+	}
 
 	// Apply override paths if provided
 
