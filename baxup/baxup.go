@@ -1,6 +1,6 @@
 package main
 
-// Baxup v0.87.0
+// Baxup v0.87.1
 
 import (
 	"flag"
@@ -22,7 +22,7 @@ const (
 	// all docker containers must be located at `/opt/docker/container1`,`/opt/docker/container2`, etc., change this root path below:
 	DefaultTargetRoot = "/opt/docker/"
 	DefaultBackupRoot = "/opt/docker-backups/"
-	Version           = "v0.87.0"
+	Version           = "v0.87.1"
 )
 
 // declare config struct
@@ -123,9 +123,6 @@ func main() {
 	// begin logging
 	initLogging()
 
-	log.Println("-------------------------------------------------------------------------")
-	log.Printf("Beginning Backup Job -- Baxup Version %s", Version)
-
 	var err error
 
 	// Defines config values
@@ -156,6 +153,9 @@ func main() {
 		fmt.Printf("Baxup %s", Version)
 		os.Exit(0)
 	}
+
+	log.Println("-------------------------------------------------------------------------")
+	log.Printf("Beginning Backup Job -- Baxup Version %s", Version)
 
 	// Apply override paths if provided
 
