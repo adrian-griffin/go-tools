@@ -10,11 +10,7 @@ import (
 	//"strings"
 )
 
-////
-// -- Toolset functions
-////
-
-// Function to prompt for input
+// prompt for input
 func promptInput(prompt string) string {
 	fmt.Print(prompt)
 	scanner := bufio.NewScanner(os.Stdin)
@@ -22,7 +18,7 @@ func promptInput(prompt string) string {
 	return scanner.Text()
 }
 
-// Function to configure Git credential helper
+// configure Git credential helper
 func configureGitCredentialCache() error {
 	cmd := exec.Command("git", "config", "--global", "credential.helper", "cache --timeout=600")
 	if err := cmd.Run(); err != nil {
@@ -31,7 +27,22 @@ func configureGitCredentialCache() error {
 	return nil
 }
 
-// Function to clone or pull the Git repository
+// get distro
+func getDistro() string {
+	releaseInfo, err := os.ReadFile("/etc/os-release")
+	if err != nil {
+		return "unknown"
+	}
+	info := string(releaseInfo)
+	case contains(info, "Arch") || contains(info, "Manjaro"):
+		return "arch"
+	case contains(info, "Debian") || contains(info, "Ubuntu"):
+		return "debian"
+	default:
+		return "unknown"
+}
+
+// clone or pull the Git repository
 func gitCloneRepo(repoURL, destination string) error {
 	// Check if destination directory exists
 	if _, err := os.Stat(destination); !os.IsNotExist(err) {
@@ -80,7 +91,7 @@ func moveFile(srcPath string, dstPath string) error {
 }
 
 func aptUpdate() error {
-	cmd := exec.Command("sudo", "apt-get", "update")
+	cmd := exec.Command("sudo", "apt-get", "update", "-y")
 	if err := cmd.Run(); err != nil {
 		return err
 	}
@@ -88,32 +99,57 @@ func aptUpdate() error {
 	return nil
 }
 
-////
-// -- Installs via package manager
-////
-// Debian-based ZSH install
-func installLinuxTools() error {
-	// Performing apt update
-	aptUpdate()
+func pacmanUpdate() error {
+	cmd := exec.Command("sudo", "pacman", "-Syu")
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	fmt.Println("Succussful pacman update . . .")
+	return nil
+}
 
-	// Installing ZSH
-	cmd := exec.Command("sudo", "apt-get", "install", "-y", "zsh")
-	if err := cmd.Run(); err != nil {
-		return err
+
+
+// install tool packages via cli
+func installLinuxTools() error {
+	distro := getLinuxDistro()
+
+	switch distro {
+	case "debian":
+		if err := aptUpdate(); err != nil {
+			return err
+		}
+		cmds := [][]string{
+			{"sudo", "apt-get", "install", "-y", "zsh"},
+			{"sudo", "apt-get", "install", "-y", "git"},
+			{"sudo", "apt-get", "install", "-y", "neovim"},
+			{"sudo", "apt-get", "install", "-y", "fzf"}
+		}
+		for _, cmdArgs := range cmds {
+			if err := exec.Command(cmdArgs[0], cmdArgs[1:]...).Run(); err != nil {
+				return fmt.Errorf("error installing %s: %w", cmdArgs[3], err)
+			}
+		}
+	case "arch":
+		if err := pacmanUpdate(); err != nil {
+			return err
+		}
+		cmds := [][]string{
+			{"sudo", "pacman", "-Sy", "--noconfirm", "zsh"},
+			{"sudo", "pacman", "-Sy", "--noconfirm", "git"},
+			{"sudo", "pacman", "-Sy", "--noconfirm", "neovim"},
+			{"sudo", "pacman", "-Sy", "--noconfirm", "fzf"},
+		}
+		for _, cmdArgs := range cmds {
+			if err := exec.Command(cmdArgs[0], cmdArgs[1:]...).Run(); err != nil {
+				return fmt.Errorf("error installing %s: %w", cmdArgs[4], err)
+			}
+		}
+	default:
+		return fmt.Errorf("unsupported distro for package install")
 	}
-	fmt.Println("Zsh Installed . . .")
-	// Installing Git
-	cmd = exec.Command("sudo", "apt-get", "install", "-y", "git")
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-	fmt.Println("Git Installed . . . ")
-	// Installing NVim
-	cmd = exec.Command("sudo", "apt-get", "install", "-y", "neovim")
-	if err := cmd.Run(); err != nil {
-		return err
-	}
-	fmt.Println("NVim Installed . . . ")
+
+	fmt.Println("Core packages installed successfully.")
 	return nil
 }
 
@@ -175,13 +211,6 @@ func ohMyZshCustomizations() error {
 	// Determine user and generate OMZ custom path
 	usr, _ := user.Current()
 	customPath := filepath.Join(usr.HomeDir, ".oh-my-zsh/custom")
-
-	// Install fzf via apt
-	fzfCmd := exec.Command("sudo", "apt-get", "install", "-y", "fzf")
-	if err := fzfCmd.Run(); err != nil {
-		return err
-	}
-	fmt.Println("fzf Installed . . .")
 
 	// Install Zsh Autosuggestions
 	err := gitCloneRepo("https://github.com/zsh-users/zsh-autosuggestions", filepath.Join(customPath, "plugins/zsh-autosuggestions"))
