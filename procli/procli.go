@@ -118,7 +118,7 @@ func installLinuxTools() error {
 			{"sudo", "apt-get", "install", "-y", "zsh"},
 			{"sudo", "apt-get", "install", "-y", "git"},
 			{"sudo", "apt-get", "install", "-y", "neovim"},
-			{"sudo", "apt-get", "install", "-y", "fzf"}
+			{"sudo", "apt-get", "install", "-y", "fzf"},
 		}
 		for _, cmdArgs := range cmds {
 			if err := exec.Command(cmdArgs[0], cmdArgs[1:]...).Run(); err != nil {
