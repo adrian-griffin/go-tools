@@ -7,7 +7,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"bufio"
-	//"strings"
+	"strings"
 )
 
 // prompt for input
@@ -29,17 +29,18 @@ func configureGitCredentialCache() error {
 
 // get distro
 func getDistro() string {
-	releaseInfo, err := os.ReadFile("/etc/os-release")
+	data, err := os.ReadFile("/etc/os-release")
 	if err != nil {
 		return "unknown"
 	}
-	info := string(releaseInfo)
-	case contains(info, "Arch") || contains(info, "Manjaro"):
+	content := string(data)
+	if strings.Contains(content, "Arch") || strings.Contains(content, "Manjaro") {
 		return "arch"
-	case contains(info, "Debian") || contains(info, "Ubuntu"):
+	}
+	if strings.Contains(content, "Debian") || strings.Contains(content, "Ubuntu") {
 		return "debian"
-	default:
-		return "unknown"
+	}
+	return "unknown"
 }
 
 // clone or pull the Git repository
@@ -72,13 +73,7 @@ func gitCloneRepo(repoURL, destination string) error {
 	return nil
 }
 
-func moveFile(srcPath string, dstPath string) error {
-	// Check if destination path already exists
-	//if _, err := os.Stat(dstPath); !os.IsNotExist(err) {
-	//	fmt.Println(dstPath, "already exists, skipping")
-	//	return nil
-	//}
-	
+func moveFile(srcPath string, dstPath string) error {	
 	// Moving file from srcPath to dstPath
 	cmd := exec.Command("sudo", "mv", srcPath, dstPath)
 	if err := cmd.Run(); err != nil {
@@ -112,7 +107,7 @@ func pacmanUpdate() error {
 
 // install tool packages via cli
 func installLinuxTools() error {
-	distro := getLinuxDistro()
+	distro := getDistro()
 
 	switch distro {
 	case "debian":
@@ -153,9 +148,6 @@ func installLinuxTools() error {
 	return nil
 }
 
-////
-// -- Git Clone Dotties
-////
 func gitCloneDotties() error {
 	// Determine user and generate homedir path
 	usr, _ := user.Current()
@@ -179,10 +171,6 @@ func gitCloneGoTools() error {
 	}
 	return nil
 }
-
-/////
-// -- Oh My Zsh Install & Customization
-////
 
 func installOhMyZsh() error {
 	// Determine current user and OMZ path
@@ -239,13 +227,6 @@ func ohMyZshCustomizations() error {
 
 	return nil
 }
-/////
-// -x
-////
-
-/////
-// -- Main
-////
 
 func main() {
 	fmt.Println(" ---------------------------------------------------- ")
@@ -299,7 +280,3 @@ func main() {
 
 	fmt.Println(" -- All work is complete, please source the shell with `source ~/.zshrc`")
 }
-
-/////
-// -x
-////
